@@ -41,63 +41,107 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
-            ),
-          ],
+        appBar: AppBar(
+          title: Text(widget.title),
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
-    );
+        body: Center(
+          child: Container(
+            width: 500,
+            height: 300,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20.0),
+              border: Border.all(
+                color: Colors.black,
+                width: 1.0,
+                style: BorderStyle.solid,
+              ),
+            ),
+            child: Column(
+              // 水平居中
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                const TabChoice(),
+                const Text(
+                  'You have pushed the button this many times:',
+                ),
+                Text(
+                  '$_counter',
+                  style: Theme.of(context).textTheme.headline4,
+                ),
+                const FooterButton(),
+              ],
+            ),
+          ),
+        ));
   }
 }
 
-/* class TabChoice extends StatefulWidget {
+// ============计时器、倒计时tab切换组件 start
+class TabChoice extends StatefulWidget {
   const TabChoice({super.key});
   @override
   State<TabChoice> createState() => _TabChoiceState();
 }
 
-enum Calendar { day, week, month, year }
+enum Tab { timer, countdown }
 
 class _TabChoiceState extends State<TabChoice> {
+  Tab activeTab = Tab.timer;
+
   @override
   Widget build(BuildContext context) {
-    return SegmentedButton<Calendar>(
-      segments: const <ButtonSegment<Calendar>>[
-        ButtonSegment<Calendar>(
-            value: Calendar.day,
-            label: Text('Day'),
-            icon: Icon(Icons.calendar_view_day)),
-        ButtonSegment<Calendar>(
-            value: Calendar.week,
-            label: Text('Week'),
-            icon: Icon(Icons.calendar_view_week)),
+    return SegmentedButton<Tab>(
+      segments: const <ButtonSegment<Tab>>[
+        ButtonSegment(value: Tab.timer, label: Text('计时器')),
+        ButtonSegment(value: Tab.countdown, label: Text('倒计时')),
       ],
-      selected: <Calendar>{calendarView},
-      onSelectionChanged: (Set<Calendar> newSelection) {
+      selected: <Tab>{activeTab},
+      onSelectionChanged: (Set<Tab> newSelection) {
         setState(() {
-          // By default there is only a single segment that can be
-          // selected at one time, so its value is always the first
-          // item in the selected set.
-          calendarView = newSelection.first;
+          activeTab = newSelection.first;
         });
       },
     );
   }
-} */
+}
+
+// ============计时器、倒计时tab切换组件 end
+
+// ============点击按钮 start
+
+class FooterButton extends StatefulWidget {
+  const FooterButton({super.key});
+  @override
+  State<FooterButton> createState() => _FooterButtonState();
+}
+
+class _FooterButtonState extends State<FooterButton> {
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Row(
+        // 水平居中
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          Padding(
+            padding: const EdgeInsets.fromLTRB(0, 0, 10, 0),
+            child: OutlinedButton(
+              onPressed: () {
+                debugPrint('Received click');
+              },
+              child: const Text('重置'),
+            ),
+          ),
+          OutlinedButton(
+            onPressed: () {
+              debugPrint('Received click');
+            },
+            child: const Text('开始'),
+          )
+        ],
+      ),
+    );
+  }
+}
+
+// ============点击按钮 end

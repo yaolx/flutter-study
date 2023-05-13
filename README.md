@@ -1,4 +1,4 @@
-# flutter-study
+# flutter_study
 
 A new Flutter project.
 
