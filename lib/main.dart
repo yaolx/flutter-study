@@ -1,7 +1,17 @@
 import 'package:flutter/material.dart';
+import 'dart:async';
 
 void main() {
   runApp(const MyApp());
+}
+
+// timer 计时器，countdown 倒计时
+enum Tab { timer, countdown }
+
+// 秒数格式转换成mm:ss
+String getFormattedTime(int seconds) {
+  var d = Duration(seconds: seconds);
+  return d.toString().substring(2, 7);
 }
 
 class MyApp extends StatelessWidget {
@@ -30,12 +40,86 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  // 计时器秒数
   int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
+  // 秒数转换后的时间
+  String _timeText = '00:00';
+  // 右边按钮名称
+  String _rightBtnText = '开始';
+  // true 暂停；false 播放
+  bool _isPause = true;
+  // tab切换
+  Tab _tab = Tab.timer;
+  // 计时器对象
+  late Timer _timer;
+  // 开始
+  void _startTimer() {
+    const period = Duration(seconds: 1);
+    _timer = Timer.periodic(period, (timer) {
+      //更新界面
+      setState(() {
+        if (_tab == Tab.timer) {
+          _counter++;
+        } else {
+          _counter--;
+        }
+        _timeText = getFormattedTime(_counter);
+      });
     });
+  }
+
+  // 重置时间
+  void resetTime(tabType) {
+    setState(() {
+      if (tabType == Tab.timer) {
+        _counter = 0;
+      } else {
+        _counter = 3599;
+      }
+      _timeText = getFormattedTime(_counter);
+      _rightBtnText = '开始';
+    });
+    _isPause = true;
+  }
+
+  // 取消定时器
+  void _cancelTimer() {
+    _timer.cancel();
+  }
+
+  // 点击开始或者暂停
+  void _onPlay([type]) {
+    // 重置
+    if (type == -1) {
+      _cancelTimer();
+      resetTime(_tab);
+      _isPause = true;
+    } else {
+      // 开始
+      if (_isPause) {
+        _startTimer();
+        setState(() {
+          _rightBtnText = '暂停';
+        });
+        _isPause = false;
+      } else {
+        // 暂停
+        _cancelTimer();
+        setState(() {
+          _rightBtnText = '开始';
+        });
+        _isPause = true;
+      }
+    }
+  }
+
+  // 切换tab
+  void _onChangeTab(Tab newValue) {
+    setState(() {
+      _tab = newValue;
+    });
+    resetTime(newValue);
+    _cancelTimer();
   }
 
   @override
@@ -60,15 +144,16 @@ class _MyHomePageState extends State<MyHomePage> {
               // 水平居中
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                const TabChoice(),
-                const Text(
-                  'You have pushed the button this many times:',
+                TabChoice(
+                  onChangeTab: _onChangeTab,
                 ),
-                Text(
-                  '$_counter',
-                  style: Theme.of(context).textTheme.headline4,
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
+                  child: Text(
+                    _timeText,
+                  ),
                 ),
-                const FooterButton(),
+                FooterButton(play: _onPlay, rightBtnText: _rightBtnText),
               ],
             ),
           ),
@@ -78,12 +163,16 @@ class _MyHomePageState extends State<MyHomePage> {
 
 // ============计时器、倒计时tab切换组件 start
 class TabChoice extends StatefulWidget {
-  const TabChoice({super.key});
+  const TabChoice({
+    super.key,
+    required this.onChangeTab,
+  });
+
+  final void Function(Tab value) onChangeTab;
+
   @override
   State<TabChoice> createState() => _TabChoiceState();
 }
-
-enum Tab { timer, countdown }
 
 class _TabChoiceState extends State<TabChoice> {
   Tab activeTab = Tab.timer;
@@ -99,6 +188,7 @@ class _TabChoiceState extends State<TabChoice> {
       onSelectionChanged: (Set<Tab> newSelection) {
         setState(() {
           activeTab = newSelection.first;
+          widget.onChangeTab(activeTab);
         });
       },
     );
@@ -110,7 +200,13 @@ class _TabChoiceState extends State<TabChoice> {
 // ============点击按钮 start
 
 class FooterButton extends StatefulWidget {
-  const FooterButton({super.key});
+  const FooterButton(
+      {super.key, required this.play, required this.rightBtnText});
+
+  final String rightBtnText;
+  // mode：-1表示重置
+  final void Function([int mode]) play;
+
   @override
   State<FooterButton> createState() => _FooterButtonState();
 }
@@ -125,18 +221,30 @@ class _FooterButtonState extends State<FooterButton> {
         children: <Widget>[
           Padding(
             padding: const EdgeInsets.fromLTRB(0, 0, 10, 0),
-            child: OutlinedButton(
+            child: FilledButton(
+              style: FilledButton.styleFrom(
+                backgroundColor: Colors.white,
+                side: const BorderSide(
+                  width: 1,
+                  color: Colors.blue,
+                ),
+              ),
               onPressed: () {
-                debugPrint('Received click');
+                widget.play(-1);
               },
-              child: const Text('重置'),
+              child: const Text(
+                '重置',
+                style: TextStyle(
+                  color: Colors.black,
+                ),
+              ),
             ),
           ),
-          OutlinedButton(
+          FilledButton(
             onPressed: () {
-              debugPrint('Received click');
+              widget.play();
             },
-            child: const Text('开始'),
+            child: Text(widget.rightBtnText),
           )
         ],
       ),
