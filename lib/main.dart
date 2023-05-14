@@ -197,9 +197,9 @@ class _TabChoiceState extends State<TabChoice> {
 
 // ============计时器、倒计时tab切换组件 end
 
-// ============点击按钮 start
+// ============点击按钮 FooterButton  无状态组件
 
-class FooterButton extends StatefulWidget {
+class FooterButton extends StatelessWidget {
   const FooterButton(
       {super.key, required this.play, required this.rightBtnText});
 
@@ -207,11 +207,6 @@ class FooterButton extends StatefulWidget {
   // mode：-1表示重置
   final void Function([int mode]) play;
 
-  @override
-  State<FooterButton> createState() => _FooterButtonState();
-}
-
-class _FooterButtonState extends State<FooterButton> {
   @override
   Widget build(BuildContext context) {
     return Center(
@@ -230,7 +225,7 @@ class _FooterButtonState extends State<FooterButton> {
                 ),
               ),
               onPressed: () {
-                widget.play(-1);
+                play(-1);
               },
               child: const Text(
                 '重置',
@@ -242,9 +237,9 @@ class _FooterButtonState extends State<FooterButton> {
           ),
           FilledButton(
             onPressed: () {
-              widget.play();
+              play();
             },
-            child: Text(widget.rightBtnText),
+            child: Text(rightBtnText),
           )
         ],
       ),
